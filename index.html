@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Rumo a Trancoso</title>
+<meta name="description" content="Planejamento do casamento de Talita e David: Igreja do Quadrado e Chez Bisutti Trancoso, 14/07/2028.">
+<meta name="theme-color" content="#3D5A47" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#101613" media="(prefers-color-scheme: dark)">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Trancoso">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="stylesheet" href="fonts.css">
+<link rel="stylesheet" href="style.css">
+<style>
+:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:0}
+html{-webkit-text-size-adjust:100%}
+body{margin:0}
+img{max-width:100%}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<header class="top"><div class="top-in" id="top"></div></header>
+<main id="view"><p style="padding:24px">Carregando...</p></main>
+<button class="fab" id="fab" hidden aria-label="Adicionar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
+<nav class="tabs" aria-label="Seções"><div class="in" id="tabs"></div></nav>
+<div class="sheet-wrap" id="sheetWrap" hidden><div class="sheet" id="sheet" role="dialog" aria-modal="true"></div></div>
+<div class="toast" id="toast" hidden></div>
+<noscript><p style="padding:24px">Ative o JavaScript para usar o app.</p></noscript>
+<script>
+/* Se o app não abrir, mostra o motivo em vez de ficar carregando para sempre. */
+(function(){
+  function show(title, msg){
+    var v = document.getElementById('view');
+    if (!v || v.getAttribute('data-ok') === '1') return;
+    v.innerHTML = '<section class="card"><h2>' + title + '</h2><p class="small">' + msg + '</p><button class="btn" onclick="location.reload()">Tentar de novo</button></section>';
+  }
+  setTimeout(function(){ show('O app está demorando para abrir', 'Na primeira vez que você abre pelo ícone, o iPhone baixa o app de novo (cerca de 300 KB). Procure um Wi-Fi melhor e toque em Tentar de novo. Depois disso ele abre sem internet.'); }, 12000);
+  window.addEventListener('error', function(e){
+    var where = (e.filename || '').split('/').pop() + (e.lineno ? ':' + e.lineno : '');
+    show('O app encontrou um erro', 'Tire um print desta tela e mande para o Claude: ' + String(e.message || 'erro desconhecido').replace(/</g,'&lt;') + ' (' + where + ')');
+  });
+})();
+</script>
+<script>window.APP_VERSION = '2026.10.28';</script>
+<script src="menu.js"></script>
+<script src="content.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
