@@ -3,7 +3,7 @@
    Registros: localStorage (um bloco por coleção). Fotos: IndexedDB.
    Nada depende de internet nem de servidor.
    ================================================================ */
-const COLS = ['orcamentos','degustacao','fornecedores','convidados','inspiracoes','perguntas','respostas','tarefas','config'];
+const COLS = ['orcamentos','degustacao','fornecedores','convidados','inspiracoes','perguntas','respostas','tarefas','config','papelaria'];
 const S = { data:{}, online:navigator.onLine, installed:false, installPrompt:null, storageOk:true };
 COLS.forEach(c => S.data[c] = new Map());
 const LKEY = c => 'rumo-trancoso:' + c;
@@ -241,7 +241,7 @@ function deadlines(){
    ROTAS E MOLDURA
    ================================================================ */
 const TABS = [['inicio','Início','home'],['roteiro','Roteiro','list'],['orcamento','Orçamento','money'],['degustacao','Degustação','fork'],['mais','Mais','more']];
-const SUB = {reuniao:'Reunião',hospedagem:'Hospedagem',convidados:'Convidados',inspiracoes:'Inspirações',fornecedores:'Fornecedores',guia:'Guia da noiva',contatos:'Contatos',ajustes:'Ajustes e backup',alertas:'Atenção',aparencia:'Aparência'};
+const SUB = {reuniao:'Reunião',hospedagem:'Hospedagem',convidados:'Convidados',inspiracoes:'Inspirações',fornecedores:'Fornecedores',guia:'Guia da noiva',contatos:'Contatos',ajustes:'Ajustes e backup',alertas:'Atenção',aparencia:'Aparência',papelaria:'Convites e papelaria'};
 let view = 'inicio';
 const UI = { orcFiltro:'todos', orcFrente:'todas', degFiltro:'todos', degOpen:new Set(['cf']), notesOpen:new Set(), pauta:'cerimonia', reuFiltro:'estrela', convFiltro:'todos', inspFiltro:'Todas', phaseOpen:null, delArm:null };
 function route(){
@@ -483,7 +483,7 @@ VIEWS.degustacao = () => {
 
 VIEWS.mais = () => {
   const qs = questionStats();
-  const L = [['reuniao','chat','Reuniões',`${qs.n} perguntas · ${qs.ans} respondidas`,true],['alertas','alert','Pontos de atenção','Auditoria da proposta'],['hospedagem','bed','Hospedagem Club Med','Simulador e regras'],['convidados','people','Convidados',`${S.data.convidados.size} na lista`],['inspiracoes','dress','Inspirações','Vestido, decoração, fotos'],['fornecedores','store','Fornecedores','Visitas e avaliações'],['guia','book','Guia da noiva','Igreja, civil, vestido, tendências'],['contatos','phone','Contatos','Igreja, Bisutti, Club Med'],['aparencia','palette','Aparência','Temas, fontes, cores, monograma e foto',true],['ajustes','gear','Ajustes e backup','Datas, meta, backup, David']];
+  const L = [['reuniao','chat','Reuniões',`${qs.n} perguntas · ${qs.ans} respondidas`,true],['alertas','alert','Pontos de atenção','Auditoria da proposta'],['hospedagem','bed','Hospedagem Club Med','Simulador e regras'],['convidados','people','Convidados',`${S.data.convidados.size} na lista`],['papelaria','mail','Convites e papelaria','Modelos com os nomes de vocês, monograma, brasão e textos',true],['inspiracoes','dress','Inspirações','Vestido, decoração, fotos'],['fornecedores','store','Fornecedores','Visitas e avaliações'],['guia','book','Guia da noiva','Igreja, civil, vestido, tendências'],['contatos','phone','Contatos','Igreja, Bisutti, Club Med'],['aparencia','palette','Aparência','Temas, fontes, cores, monograma e foto',true],['ajustes','gear','Ajustes e backup','Datas, meta, backup, David']];
   return `<div class="menu-grid">${L.map(([h,i,t,s,w]) => `<a href="#${h}" class="${w?'wide':''}">${icon(i)}<b>${esc(t)}</b><span>${esc(s)}</span></a>`).join('')}</div>`;
 };
 

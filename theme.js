@@ -19,7 +19,7 @@ const TEMAS = [
   {id:'mata',nome:'Mata',desc:'Verde-mata e terracota (o visual anterior)',bg:'#F3F4EF',surface:'#FFFFFF',ink:'#1B2520',primary:'#3D5A47',accent:'#B4583F',display:'Cormorant Garamond',body:'Karla',names:'Cormorant Garamond',namesStyle:'italic'},
   {id:'noite',nome:'Noite',desc:'Escuro, com dourado e azul acinzentado',escuro:true,bg:'#15171B',surface:'#1D2025',ink:'#ECE8E2',primary:'#D9C4A3',accent:'#8FA5B5',display:'Playfair Display',body:'Lato',names:'Pinyon Script'}
 ];
-const AP_PADRAO = {tema:'areia', modo:'auto', fDisplay:'', fBody:'', fNames:'', fNamesStyle:'', custom:false, cores:null, paleta:[], monograma:'', monoNoTopo:true, capa:'', capaFundo:false, fundoIntensidade:14, capaFoco:'center', cantos:'suave', cartoes:'borda', tamanho:'normal'};
+const AP_PADRAO = {tema:'areia', modo:'auto', fDisplay:'', fBody:'', fNames:'', fNamesStyle:'', custom:false, cores:null, paleta:[], monograma:'', monoEstilo:'', monoNoTopo:true, capa:'', capaFundo:false, fundoIntensidade:14, capaFoco:'center', cantos:'suave', cartoes:'borda', tamanho:'normal'};
 const ap = () => ({...AP_PADRAO, ...(S.data.config.get('aparencia') || {})});
 function setAp(patch){ save('config','aparencia',{...(S.data.config.get('aparencia')||{}), ...patch}); applyTheme(); }
 
@@ -94,7 +94,9 @@ matchMedia('(prefers-color-scheme: dark)').addEventListener?.('change', () => { 
 const iniciais = () => { const n = (cfg().nomes||'').split('&').map(s => s.trim()).filter(Boolean); return n.length >= 2 ? `${n[0][0]}&${n[1][0]}` : (n[0]||'T')[0]; };
 function monoHtml(cls){
   const a = ap();
-  return a.monograma ? `<img class="${cls} mono-img" data-foto="${esc(a.monograma)}" alt="Monograma">` : `<span class="${cls} mono-txt">${esc(iniciais())}</span>`;
+  if (a.monograma) return `<img class="${cls} mono-img" data-foto="${esc(a.monograma)}" alt="Monograma">`;
+  if (a.monoEstilo && window.MONOS && MONOS[a.monoEstilo]) return `<span class="${cls} mono-svg" role="img" aria-label="Monograma">${MONOS[a.monoEstilo].svg()}</span>`;
+  return `<span class="${cls} mono-txt">${esc(iniciais())}</span>`;
 }
 
 /* ---------------- tela Aparência ---------------- */
@@ -248,7 +250,7 @@ async function compressPng(file){
   } catch(e){ return file; }
 }
 
-Object.assign(IC, {palette:'<path d="M12 3a9 9 0 1 0 0 18c1.1 0 1.7-.8 1.7-1.6 0-.5-.2-.8-.4-1.1-.3-.3-.4-.6-.4-1 0-.9.7-1.6 1.6-1.6H17a4 4 0 0 0 4-4C21 6.8 17 3 12 3z"/><circle cx="7.5" cy="11" r="1"/><circle cx="10" cy="7" r="1"/><circle cx="14.5" cy="7" r="1"/>'});
+Object.assign(IC, {mail:'<rect x="3" y="5" width="18" height="14" rx="1.5"/><path d="M3.5 6l8.5 7 8.5-7"/>', palette:'<path d="M12 3a9 9 0 1 0 0 18c1.1 0 1.7-.8 1.7-1.6 0-.5-.2-.8-.4-1.1-.3-.3-.4-.6-.4-1 0-.9.7-1.6 1.6-1.6H17a4 4 0 0 0 4-4C21 6.8 17 3 12 3z"/><circle cx="7.5" cy="11" r="1"/><circle cx="10" cy="7" r="1"/><circle cx="14.5" cy="7" r="1"/>'});
 
 /* inicialização */
 loadAll();
