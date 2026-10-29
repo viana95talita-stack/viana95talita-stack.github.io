@@ -1,8 +1,8 @@
 /* Guarda o app inteiro no aparelho para funcionar sem internet.
    Ao publicar uma versão nova, mude VERSION para os aparelhos baixarem de novo. */
-const VERSION = 'rumo-2026.10.28';
+const VERSION = 'rumo-2026.10.29';
 const FILES = ['./','index.html','style.css','fonts.css','menu.js','content.js','app.js','manifest.webmanifest',
-  'fonts/cormorant-600.woff','fonts/cormorant-600i.woff','fonts/karla.woff2',
+  'theme.js','fonts/cormorant-garamond-n-300_700.woff2','fonts/cormorant-garamond-i-300_700.woff2','fonts/jost-n-300_700.woff2','fonts/pinyon-script-n-400.woff2',
   'icons/icon-192.png','icons/icon-512.png','icons/maskable-512.png','icons/apple-touch-icon.png','icons/favicon-32.png'];
 
 self.addEventListener('install', e => {

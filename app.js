@@ -84,7 +84,8 @@ async function hydratePhotos(root){
 let pending = false, raf = 0;
 function scheduleRender(){
   const a = document.activeElement;
-  if (a && a.closest('#view') && /^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName)) { pending = true; return; }
+  const typing = a && a.closest('#view') && (a.tagName === 'TEXTAREA' || a.tagName === 'SELECT' || (a.tagName === 'INPUT' && !/^(checkbox|radio|range|color|file|button|submit)$/.test(a.type)));
+  if (typing) { pending = true; return; }
   cancelAnimationFrame(raf); raf = requestAnimationFrame(render);
 }
 document.addEventListener('focusout', () => { if (pending) { pending = false; setTimeout(scheduleRender, 50); } });
@@ -240,7 +241,7 @@ function deadlines(){
    ROTAS E MOLDURA
    ================================================================ */
 const TABS = [['inicio','Início','home'],['roteiro','Roteiro','list'],['orcamento','Orçamento','money'],['degustacao','Degustação','fork'],['mais','Mais','more']];
-const SUB = {reuniao:'Reunião',hospedagem:'Hospedagem',convidados:'Convidados',inspiracoes:'Inspirações',fornecedores:'Fornecedores',guia:'Guia da noiva',contatos:'Contatos',ajustes:'Ajustes e backup',alertas:'Atenção'};
+const SUB = {reuniao:'Reunião',hospedagem:'Hospedagem',convidados:'Convidados',inspiracoes:'Inspirações',fornecedores:'Fornecedores',guia:'Guia da noiva',contatos:'Contatos',ajustes:'Ajustes e backup',alertas:'Atenção',aparencia:'Aparência'};
 let view = 'inicio';
 const UI = { orcFiltro:'todos', orcFrente:'todas', degFiltro:'todos', degOpen:new Set(['cf']), notesOpen:new Set(), pauta:'cerimonia', reuFiltro:'estrela', convFiltro:'todos', inspFiltro:'Todas', phaseOpen:null, delArm:null };
 function route(){
@@ -255,7 +256,9 @@ function render(){
   const isSub = !!SUB[view];
   const title = isSub ? SUB[view] : ({inicio:cfg().nomes, roteiro:'Roteiro até o sim', orcamento:'Orçamento', degustacao:'Degustação', mais:'Mais'})[view];
   const st = S.online ? ['sync on','no aparelho'] : ['sync','sem internet'];
-  document.getElementById('top').innerHTML = (isSub ? `<button class="back" data-act="back" aria-label="Voltar">${icon('back')}</button>` : '') + `<h1>${esc(title)}</h1><span class="${st[0]}"><i></i>${st[1]}</span>`;
+  const topMono = view === 'inicio' && ap().monoNoTopo ? monoHtml('mono-top') : '';
+  document.getElementById('top').innerHTML = (isSub ? `<button class="back" data-act="back" aria-label="Voltar">${icon('back')}</button>` : '') + topMono + `<h1>${esc(view === 'inicio' ? 'Início' : title)}</h1><span class="${st[0]}"><i></i>${st[1]}</span>`;
+  hydratePhotos(document.getElementById('top'));
   const parent = isSub ? 'mais' : view;
   document.getElementById('tabs').innerHTML = TABS.map(t => `<a href="#${t[0]}" ${t[0]===parent?'aria-current="page"':''}>${icon(t[2])}<span>${t[1]}</span></a>`).join('');
   const v = document.getElementById('view');
@@ -274,7 +277,7 @@ const VIEWS = {};
 const alertHtml = a => `<div class="alert ${a[0]}"><span class="dot"></span><div><b>${esc(a[1])}</b><p>${esc(a[2])}</p></div></div>`;
 
 VIEWS.inicio = () => {
-  const c = cfg(), W = wedding(), t = today();
+  const c = cfg(), W = wedding(), t = today(), A_ = ap();
   const dias = daysBetween(t, W), meses = Math.floor(dias / 30.44);
   const b = budget(), ck = checklistStats(), ts = tastingStats(), qs = questionStats('cerimonia');
   const reu = D(c.reuniao); const dReu = reu ? daysBetween(t, reu) : null;
@@ -285,17 +288,22 @@ VIEWS.inicio = () => {
   const needBk = (!lastBk || daysBetween(lastBk, new Date()) > 14) && m.instaladoEm && daysBetween(new Date(m.instaladoEm), new Date()) >= 3;
   return `
   <section class="hero">
-    <div class="eyebrow" style="color:inherit;opacity:.8">Trancoso · Bahia</div>
-    <div class="names">${esc(c.nomes)}</div>
-    <div class="count num">
-      <div><b>${Math.max(0,dias)}</b><span>dias</span></div>
-      <div><b>${Math.max(0,meses)}</b><span>meses</span></div>
-      <div><b>${c.convidados}</b><span>convidados</span></div>
-    </div>
-    <div class="meta">${esc(fmtLong(W))}</div>
-    <div class="hero-legs">
-      <div>${icon('church')}<span><b>Cerimônia</b>${esc(c.igreja)}${c.cerimoniaHora?' · '+esc(c.cerimoniaHora):' · horário a definir'}</span></div>
-      <div>${icon('fork')}<span><b>Festa</b>${esc(c.local)} · ${esc(c.hora)}</span></div>
+    ${A_.capa ? `<img class="hero-cover" data-foto="${esc(A_.capa)}" alt="Foto de ${esc(c.nomes)}" style="object-position:center ${A_.capaFoco}">` : ''}
+    <div class="hero-body">
+      ${A_.capa ? '' : monoHtml('mono-hero')}
+      <div class="names">${esc(c.nomes)}</div>
+      <div class="hero-date">${esc(fmtD(W,{day:'numeric',month:'long',year:'numeric'}))} · Trancoso</div>
+      <hr class="rule">
+      <div class="count num">
+        <div><b>${Math.max(0,dias)}</b><span>dias</span></div>
+        <div><b>${Math.max(0,meses)}</b><span>meses</span></div>
+        <div><b>${c.convidados}</b><span>convidados</span></div>
+      </div>
+      <div class="hero-legs">
+        <div>${icon('church')}<b>Cerimônia</b><span>${esc(c.igreja)}${c.cerimoniaHora?' · '+esc(c.cerimoniaHora):''}</span></div>
+        <div>${icon('fork')}<b>Festa</b><span>${esc(c.local)} · ${esc(c.hora)}</span></div>
+      </div>
+      ${(A_.paleta||[]).length ? `<div class="pal-strip">${A_.paleta.map(x => `<i style="background:${esc(x)}"></i>`).join('')}</div>` : ''}
     </div>
   </section>
 
@@ -475,7 +483,7 @@ VIEWS.degustacao = () => {
 
 VIEWS.mais = () => {
   const qs = questionStats();
-  const L = [['reuniao','chat','Reuniões',`${qs.n} perguntas · ${qs.ans} respondidas`,true],['alertas','alert','Pontos de atenção','Auditoria da proposta'],['hospedagem','bed','Hospedagem Club Med','Simulador e regras'],['convidados','people','Convidados',`${S.data.convidados.size} na lista`],['inspiracoes','dress','Inspirações','Vestido, decoração, fotos'],['fornecedores','store','Fornecedores','Visitas e avaliações'],['guia','book','Guia da noiva','Igreja, civil, vestido, tendências'],['contatos','phone','Contatos','Igreja, Bisutti, Club Med'],['ajustes','gear','Ajustes e backup','Datas, meta, backup, David']];
+  const L = [['reuniao','chat','Reuniões',`${qs.n} perguntas · ${qs.ans} respondidas`,true],['alertas','alert','Pontos de atenção','Auditoria da proposta'],['hospedagem','bed','Hospedagem Club Med','Simulador e regras'],['convidados','people','Convidados',`${S.data.convidados.size} na lista`],['inspiracoes','dress','Inspirações','Vestido, decoração, fotos'],['fornecedores','store','Fornecedores','Visitas e avaliações'],['guia','book','Guia da noiva','Igreja, civil, vestido, tendências'],['contatos','phone','Contatos','Igreja, Bisutti, Club Med'],['aparencia','palette','Aparência','Temas, fontes, cores, monograma e foto',true],['ajustes','gear','Ajustes e backup','Datas, meta, backup, David']];
   return `<div class="menu-grid">${L.map(([h,i,t,s,w]) => `<a href="#${h}" class="${w?'wide':''}">${icon(i)}<b>${esc(t)}</b><span>${esc(s)}</span></a>`).join('')}</div>`;
 };
 
@@ -648,6 +656,7 @@ VIEWS.ajustes = () => {
     <div class="row"><button class="btn" data-act="json">Fazer backup</button><label class="btn ghost" style="cursor:pointer">Importar backup<input type="file" accept="application/json,.json" data-import="1" hidden></label></div>
     <button class="btn line" data-act="csv">Exportar orçamentos (planilha)</button>
   </section>
+  <a class="card" href="#aparencia" style="text-decoration:none;color:inherit"><div class="row between"><h3>Aparência</h3><span class="pill">temas</span></div><p class="small muted" style="margin:0">Temas, fontes, cores do casamento, monograma e foto de vocês.</p></a>
   <section class="card">
     <h3>Sobre o app</h3>
     <dl class="kv"><dt>Modo</dt><dd>${S.installed ? 'instalado' : 'no navegador'}</dd><dt>Internet</dt><dd>${S.online ? 'conectado' : 'sem internet'}</dd><dt>Funciona offline</dt><dd>${'serviceWorker' in navigator ? 'sim' : 'não neste navegador'}</dd><dt>Versão</dt><dd>${esc(window.APP_VERSION||'')}</dd></dl>
@@ -790,7 +799,7 @@ async function exportJson(){
   toast('Preparando o backup...');
   const out = {app:'rumo-a-trancoso', versao:1, exportadoEm:new Date().toISOString(), apagados: meta().apagados || {}, fotos:{}};
   COLS.forEach(c => { out[c] = {}; S.data[c].forEach((v,k) => { const b = {...v}; delete b.id; out[c][k] = b; }); });
-  const used = new Set(); COLS.forEach(c => S.data[c].forEach(v => v.foto && used.add(v.foto)));
+  const used = new Set(); COLS.forEach(c => S.data[c].forEach(v => ['foto','monograma','capa'].forEach(k => v[k] && used.add(v[k]))));
   for (const id of used){ const b = await fotoGet(id); if (b) out.fotos[id] = await blobToDataUrl(b); }
   const stamp = new Date().toISOString().slice(0,10);
   const ok = await offerFile(`backup-rumo-a-trancoso-${stamp}.json`, new Blob([JSON.stringify(out)], {type:'application/json'}));
@@ -957,6 +966,4 @@ if ('serviceWorker' in navigator && location.protocol !== 'file:'){
 }
 if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(() => {});
 
-loadAll();
-seedIfFirstRun();
-route();
+/* a inicialização fica no fim de theme.js, que é carregado depois deste arquivo */
